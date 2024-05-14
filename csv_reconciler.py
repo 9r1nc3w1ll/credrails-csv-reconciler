@@ -15,46 +15,46 @@ def reconcile_csv(source_path, target_path, output_path):
         target_ids.add(record["ID"])
 
     with open(output_path, "w", newline="") as csvfile:
-        fieldnames = ["Type", "Record", "Identifier", "Field", "Source Value", "Target Value"]
+        fieldnames = ["Type", "Record Identifier", "Identifier", "Field", "Source Value", "Target Value"]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
 
         for id in source_ids - target_ids:
-            writer.writerow({"Type": "Missing in Target", "Record": id})
+            writer.writerow({"Type": "Missing in Target", "Record Identifier": id})
 
         for id in target_ids - source_ids:
-            writer.writerow({"Type": "Missing in Source", "Record": id})
+            writer.writerow({"Type": "Missing in Source", "Record Identifier": id})
 
         for id in source_ids & target_ids:
-            s = find_index_by_key_value(source_data, "ID", id)
-            t = find_index_by_key_value(target_data, "ID", id)
+            source_index = find_index_by_key_value(source_data, "ID", id)
+            target_index = find_index_by_key_value(target_data, "ID", id)
 
-            if (s and t):
-                if (source_data[s]["Date"] != target_data[t]["Date"]):
+            if (source_index and target_index):
+                if (source_data[source_index]["Date"] != target_data[target_index]["Date"]):
                     writer.writerow({
                         "Type": "Field Discrepancy",
-                        "Record": id,
+                        "Record Identifier": id,
                         "Field": "Date",
-                        "Source Value": source_data[s]["Date"],
-                        "Target Value": target_data[s]["Date"]
+                        "Source Value": source_data[source_index]["Date"],
+                        "Target Value": target_data[source_index]["Date"]
                     })
 
-                if (source_data[s]["Name"] != target_data[t]["Name"]):
+                if (source_data[source_index]["Name"] != target_data[target_index]["Name"]):
                     writer.writerow({
                         "Type": "Field Discrepancy",
-                        "Record": id,
+                        "Record Identifier": id,
                         "Field": "Name",
-                        "Source Value": source_data[s]["Name"],
-                        "Target Value": target_data[s]["Name"]
+                        "Source Value": source_data[source_index]["Name"],
+                        "Target Value": target_data[source_index]["Name"]
                     })
 
-                if (source_data[s]["Amount"] != target_data[t]["Amount"]):
+                if (source_data[source_index]["Amount"] != target_data[target_index]["Amount"]):
                     writer.writerow({
                         "Type": "Field Discrepancy",
-                        "Record": id,
+                        "Record Identifier": id,
                         "Field": "Amount",
-                        "Source Value": source_data[s]["Amount"],
-                        "Target Value": target_data[s]["Amount"]
+                        "Source Value": source_data[source_index]["Amount"],
+                        "Target Value": target_data[source_index]["Amount"]
                     })
 
 def find_index_by_key_value(lst, key, value):
@@ -85,7 +85,7 @@ def main():
     args = parser.parse_args()
 
     reconcile_csv(args.source, args.target, args.output)
-    print(f"Reconciliation report generated and saved to {args.output}")
+    print(f"Report saved to {args.output}")
 
 if __name__ == "__main__":
     main()
